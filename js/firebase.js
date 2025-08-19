@@ -3,8 +3,9 @@
 const firebaseConfig = {
   apiKey: "AIzaSyDziuC_KtfBrZV1MDPJkqV5hQdE9VKeb88",
   authDomain: "rent-3c304.firebaseapp.com",
+  databaseURL: "https://rent-3c304-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "rent-3c304",
-
+  storageBucket: "rent-3c304.appspot.com",
   messagingSenderId: "333350818338",
   appId: "1:333350818338:web:2c55ae54788f28a2e0b07b",
   measurementId: "G-V0NBBY03P3"

@@ -108,7 +108,7 @@
       return { pad: null, resize: () => {}, cleanup: () => {} };
     }
 
-    const hasSignaturePad = !!window.SignaturePad;
+    const hasSignaturePad = typeof window.SignaturePad === 'function';
     if (!hasSignaturePad) {
       console.warn("SignaturePad não está disponível");
       return { pad: null, resize: () => {}, cleanup: () => {} };
@@ -142,11 +142,7 @@
           if (ctx) {
             ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
           }
-          try {
-            pad.clear();
-          } catch (error) {
-            console.warn("Erro ao limpar signature pad:", error);
-          }
+          // Não limpar automaticamente no resize para preservar assinatura
         } catch (error) {
           console.warn("Erro ao redimensionar signature pad:", error);
         }

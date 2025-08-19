@@ -425,8 +425,38 @@ class AdvancedDashboard {
   }
 
   updateStatistics() {
-    // This will be called by the existing dashboard logic
-    // We just need to ensure it uses the current time filter
+    // Implementar lógica de estatísticas
+    this.loadStatistics();
+  }
+
+  async loadStatistics() {
+    try {
+      if (!window.db) return;
+      
+      const [veiculosSnap, alugueresSnap] = await Promise.all([
+        window.db.ref('veiculos').once('value'),
+        window.db.ref('alugueres').once('value')
+      ]);
+      
+      const veiculos = veiculosSnap.val() || {};
+      const alugueres = alugueresSnap.val() || {};
+      
+      const totalVeiculos = Object.keys(veiculos).length;
+      const emUso = Object.keys(alugueres).length;
+      const disponiveis = totalVeiculos - emUso;
+      
+      // Atualizar elementos do DOM
+      const totalEl = document.getElementById('totalVeiculos');
+      const usoEl = document.getElementById('veiculosEmUso');
+      const disponiveisEl = document.getElementById('veiculosDisponiveis');
+      
+      if (totalEl) totalEl.textContent = totalVeiculos;
+      if (usoEl) usoEl.textContent = emUso;
+      if (disponiveisEl) disponiveisEl.textContent = disponiveis;
+      
+    } catch (error) {
+      console.error('Erro ao carregar estatísticas:', error);
+    }
   }
 
   updateCharts() {
@@ -524,11 +554,83 @@ class AdvancedDashboard {
   }
 
   updateOccupationChart() {
-    // This will be updated by the existing dashboard logic
+    const canvas = document.getElementById('occupationChart');
+    if (!canvas) return;
+    
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Implementar gráfico de ocupação básico
+    const totalVeiculos = parseInt(document.getElementById('totalVeiculos')?.textContent || '0');
+    const emUso = parseInt(document.getElementById('veiculosEmUso')?.textContent || '0');
+    
+    if (totalVeiculos === 0) return;
+    
+    const ocupacao = (emUso / totalVeiculos) * 100;
+    
+    // Limpar canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Desenhar gráfico circular simples
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = Math.min(centerX, centerY) - 10;
+    
+    // Fundo
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fill();
+    
+    // Ocupação
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, radius, -Math.PI / 2, (-Math.PI / 2) + (ocupacao / 100) * 2 * Math.PI);
+    ctx.lineWidth = 20;
+    ctx.strokeStyle = ocupacao > 80 ? '#28a745' : ocupacao > 50 ? '#ffc107' : '#dc3545';
+    ctx.stroke();
+    
+    // Texto central
+    ctx.fillStyle = '#333';
+    ctx.font = 'bold 24px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(`${ocupacao.toFixed(1)}%`, centerX, centerY);
   }
 
   updateRecentRentals() {
-    // This will be updated by the existing dashboard logic
+    if (!window.db) return;
+    
+    window.db.ref('alugueres').limitToLast(5).once('value').then(snap => {
+      const alugueres = snap.val() || {};
+      const recentList = document.getElementById('recentRentalsList');
+      if (!recentList) return;
+      
+      const items = Object.entries(alugueres).map(([id, data]) => ({ id, ...data }));
+      
+      if (items.length === 0) {
+        recentList.innerHTML = '<div class="muted">Nenhum aluguer recente</div>';
+        return;
+      }
+      
+      recentList.innerHTML = items.map(item => {
+        const cliente = item.cliente?.nome || 'Cliente';
+        const veiculo = item.veiculo?.matricula || 'Veículo';
+        const data = new Date(item.criadoEm || '').toLocaleDateString('pt-PT');
+        
+        return `
+          <div class="recent-item">
+            <div class="recent-item-header">
+              <div class="recent-item-title">${cliente}</div>
+              <div class="recent-item-status active">Em vigor</div>
+            </div>
+            <div class="recent-item-details">
+              ${veiculo} • ${data}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }).catch(error => {
+      console.error('Erro ao carregar alugueres recentes:', error);
+    });
   }
 
   updateAlerts() {

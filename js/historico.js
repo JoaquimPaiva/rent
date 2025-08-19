@@ -163,9 +163,17 @@
       const periodo = `${a.inicio || ''} → ${a.fim || ''}`;
       const autorLinha = item.criadoPor?.nome || item.criadoPor?.email ? `<span class="muted">Criado por: ${item.criadoPor?.nome || item.criadoPor?.email}</span>` : '';
       
+      // Verificar se o contrato já expirou
+      const agora = new Date();
+      const fimData = new Date(a.fim || '');
+      const expirado = !isNaN(fimData.getTime()) && fimData < agora;
+      const statusClass = expirado ? 'expired' : 'active';
+      const statusText = expirado ? 'Expirado' : 'Em vigor';
+      
       div.innerHTML = `
         <strong>${titulo}</strong>
         <span>${periodo}</span>
+        <div class="status-badge ${statusClass}">${statusText}</div>
         ${autorLinha}
         <div style="display:flex; gap:8px; flex-wrap: wrap;">
           <button class="btn" data-view="${item._id}">Ver PDF</button>
@@ -173,7 +181,7 @@
           <button class="btn end" data-receber="${item._id}">Receber</button>
           <button class="btn wpp" data-whatsapp="${item._id}">Enviar WhatsApp</button>
           <button class="btn email" data-email="${item._id}">Enviar Email</button>
-          <button class="btn danger" style="display:none;" data-close="${item._id}">Encerrar</button>
+          ${expirado ? `<button class="btn danger" data-close="${item._id}">Encerrar</button>` : ''}
         </div>
       `;
       return div;

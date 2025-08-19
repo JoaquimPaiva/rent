@@ -121,7 +121,12 @@ function protectPage() {
         window.loading.button(submitBtn, true, 'A entrar...');
       }
       
-      await auth.signInWithEmailAndPassword(email, password);
+      const userCredential = await auth.signInWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+      
+      if (!user) {
+        throw new Error('Falha na autenticação');
+      }
       
       // Definir expiração para o próximo boundary (12:00 ou 00:00)
       try { 

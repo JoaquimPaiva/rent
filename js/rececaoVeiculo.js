@@ -365,7 +365,7 @@ document.addEventListener('change', async (e) => {
           }
         },
         fotosDevolucao: fotos,
-         danosIdentificados: await obterResumoDanos(contratoAtual._id),
+        danosIdentificados: await obterResumoDanos(contratoAtual._id),
         observacoesRececao: document.getElementById('obsRececao')?.value || '',
         assinaturaCliente: signaturePadCliente && !signaturePadCliente.isEmpty() ? signaturePadCliente.toDataURL() : null,
         assinaturaRececao: signaturePadRececao && !signaturePadRececao.isEmpty() ? signaturePadRececao.toDataURL() : null,

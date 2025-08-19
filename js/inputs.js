@@ -79,7 +79,7 @@
     if (!val || typeof val !== 'string') return '';
     
     try {
-      const raw = val.toUpperCase().replace(/[^A-Z0-9]+/g, '').slice(0, 6);
+      const raw = val.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
       const g1 = raw.slice(0, 2);
       const g2 = raw.slice(2, 4);
       const g3 = raw.slice(4, 6);

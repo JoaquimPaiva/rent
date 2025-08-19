@@ -190,18 +190,66 @@
     const snap = await db.ref(`alugueres/${contratoId}`).once('value');
     const c = snap.val();
     if (!c) {
-      alert('Contrato não encontrado');
-      window.location.href = 'historico.html';
-      return;
+      // Tentar procurar em contratos terminados
+      const snapTerminados = await db.ref(`alugueres_terminados/${contratoId}`).once('value');
+      const cTerminado = snapTerminados.val();
+      if (!cTerminado) {
+        alert('Contrato não encontrado');
+        window.location.href = 'historico.html';
+        return;
+      }
+      contratoAtual = { _id: contratoId, ...cTerminado };
+    } else {
+      contratoAtual = { _id: contratoId, ...c };
     }
-    contratoAtual = { _id: contratoId, ...c };
+    
+    const contrato = contratoAtual;
     if (contratoIdSpan) contratoIdSpan.textContent = `ID: ${contratoId}`;
-    if (clienteNomeSpan) clienteNomeSpan.textContent = c.cliente?.nome || '—';
+    if (clienteNomeSpan) clienteNomeSpan.textContent = contrato.cliente?.nome || '—';
     if (veiculoInfoSpan) {
-      const v = c.veiculo || {}; veiculoInfoSpan.textContent = `${v.marca || ''} ${v.modelo || ''} (${v.matricula || ''})`;
+      const v = contrato.veiculo || {}; 
+      veiculoInfoSpan.textContent = `${v.marca || ''} ${v.modelo || ''} (${v.matricula || ''})`;
     }
     if (periodoAluguerSpan) {
-      const a = c.aluguer || {}; periodoAluguerSpan.textContent = `${a.inicio || ''} → ${a.fim || ''}`;
+      const a = contrato.aluguer || {}; 
+      periodoAluguerSpan.textContent = `${a.inicio || ''} → ${a.fim || ''}`;
+    }
+  }
+
+  // Função auxiliar que estava em falta
+  async function loadContrato(contratoId){
+    try {
+      const snap = await db.ref(`alugueres/${contratoId}`).once('value');
+      const c = snap.val();
+      if (!c) {
+        // Tentar procurar em contratos terminados
+        const snapTerminados = await db.ref(`alugueres_terminados/${contratoId}`).once('value');
+        const cTerminado = snapTerminados.val();
+        if (!cTerminado) {
+          alert('Contrato não encontrado');
+          window.location.href = 'historico.html';
+          return;
+        }
+        contratoAtual = { _id: contratoId, ...cTerminado };
+      } else {
+        contratoAtual = { _id: contratoId, ...c };
+      }
+      
+      const contrato = contratoAtual;
+      if (contratoIdSpan) contratoIdSpan.textContent = `ID: ${contratoId}`;
+      if (clienteNomeSpan) clienteNomeSpan.textContent = contrato.cliente?.nome || '—';
+      if (veiculoInfoSpan) {
+        const v = contrato.veiculo || {}; 
+        veiculoInfoSpan.textContent = `${v.marca || ''} ${v.modelo || ''} (${v.matricula || ''})`;
+      }
+      if (periodoAluguerSpan) {
+        const a = contrato.aluguer || {}; 
+        periodoAluguerSpan.textContent = `${a.inicio || ''} → ${a.fim || ''}`;
+      }
+    } catch (error) {
+      console.error('Erro ao carregar contrato:', error);
+      alert('Erro ao carregar contrato');
+      return;
     }
   }
 

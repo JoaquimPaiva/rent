@@ -167,7 +167,18 @@ function isValidNIF(nif) {
   
   try {
     const cleanNIF = nif.replace(/\D/g, '');
-    return cleanNIF.length === 9 && /^\d{9}$/.test(cleanNIF);
+    if (cleanNIF.length !== 9 || !/^\d{9}$/.test(cleanNIF)) return false;
+    
+    // Validação do dígito de controlo do NIF português
+    const digits = cleanNIF.split('').map(Number);
+    const checksum = digits.slice(0, 8).reduce((sum, digit, index) => {
+      return sum + digit * (9 - index);
+    }, 0);
+    
+    const remainder = checksum % 11;
+    const checkDigit = remainder < 2 ? 0 : 11 - remainder;
+    
+    return digits[8] === checkDigit;
   } catch (error) {
     console.warn('Erro ao validar NIF:', error);
     return false;
@@ -178,8 +189,9 @@ function isValidMatricula(matricula) {
   if (!matricula || typeof matricula !== 'string') return false;
   
   try {
-    const cleanMat = matricula.trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
-    return /^[A-Z]{2}\d{2}[A-Z0-9]{2}$/.test(cleanMat);
+    const cleanMat = matricula.trim().toUpperCase();
+    // Formato português: XX-XX-XX onde X pode ser letra ou número
+    return /^[A-Z0-9]{2}-[A-Z0-9]{2}-[A-Z0-9]{2}$/.test(cleanMat);
   } catch (error) {
     console.warn('Erro ao validar matrícula:', error);
     return false;

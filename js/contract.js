@@ -283,6 +283,12 @@ function makePdfHelpers(doc, styles, company) {
           const altFmt = fmt === 'JPEG' ? 'PNG' : 'JPEG';
           doc.addImage(images[i], altFmt, x, y, w, h);
         } catch {}
+          // Se falhar completamente, desenhar um placeholder
+          doc.setFillColor(240, 240, 240);
+          doc.rect(x, y, w, h, 'F');
+          doc.setTextColor(120, 120, 120);
+          doc.setFontSize(10);
+          doc.text('Imagem não disponível', x + w/2, y + h/2, { align: 'center' });
       }
       if (col === cols - 1) y += h + gap;
     }

@@ -3,10 +3,71 @@ document.addEventListener('DOMContentLoaded', () => {
     const notificationBell = document.getElementById('notification-bell');
     const notificationBadge = document.querySelector('.notification-badge');
 
-    // if (!notificationBell) {
-    //   console.warn('Elemento notification-bell não encontrado');
-    //   return;
-    // }
+    // Sistema de notificações toast melhorado
+    const createToastSystem = () => {
+      const container = document.createElement('div');
+      container.id = 'toast-container';
+      container.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        pointer-events: none;
+      `;
+      document.body.appendChild(container);
+      return container;
+    };
+
+    const showToast = (message, type = 'info', duration = 4000) => {
+      let container = document.getElementById('toast-container');
+      if (!container) {
+        container = createToastSystem();
+      }
+
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.style.cssText = `
+        background: var(--${type === 'success' ? 'success' : type === 'error' ? 'danger' : type === 'warning' ? 'warning' : 'primary'});
+        color: white;
+        padding: 12px 16px;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        pointer-events: auto;
+        animation: slideInRight 0.3s ease-out;
+        max-width: 300px;
+        word-wrap: break-word;
+      `;
+      toast.textContent = message;
+
+      container.appendChild(toast);
+
+      // Auto remove
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.style.animation = 'slideOutRight 0.3s ease-in';
+          setTimeout(() => toast.remove(), 300);
+        }
+      }, duration);
+
+      // Click to dismiss
+      toast.addEventListener('click', () => {
+        if (toast.parentNode) {
+          toast.style.animation = 'slideOutRight 0.3s ease-in';
+          setTimeout(() => toast.remove(), 300);
+        }
+      });
+    };
+
+    // Expor globalmente
+    window.notifications = {
+      success: (msg) => showToast(msg, 'success'),
+      error: (msg) => showToast(msg, 'error'),
+      warning: (msg) => showToast(msg, 'warning'),
+      info: (msg) => showToast(msg, 'info')
+    };
 
     let notifications = []; // Array para armazenar as notificações
     let popup = null; // Referência ao popup

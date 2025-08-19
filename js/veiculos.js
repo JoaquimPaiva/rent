@@ -189,8 +189,14 @@
       throw new Error('Preenche os campos obrigatórios.');
     }
 
+    // Validar matrícula portuguesa
+    const matriculaRegex = /^[A-Z]{2}-\d{2}-\d{2}$/;
+    if (!matriculaRegex.test(matricula.toUpperCase())) {
+      throw new Error('Formato de matrícula inválido. Use o formato XX-XX-XX.');
+    }
+
     const fileInputs = Array.from(document.querySelectorAll('#fotosWrap .veicFoto'));
-    const fotos = Array.from(fotosWrap.querySelectorAll('img')).map(img => img.src);
+    const fotos = fotosWrap ? Array.from(fotosWrap.querySelectorAll('img')).map(img => img.src) : [];
     for (const input of fileInputs) {
       const file = input.files && input.files[0];
       if (!file) continue;

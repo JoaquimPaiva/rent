@@ -56,7 +56,11 @@
     const total = subtotal + ex - de;
     
     if (lblSubtotal) lblSubtotal.textContent = `${subtotal.toFixed(2)} €`;
-    if (lblTotal) lblTotal.textContent = `${total.toFixed(2)} €`;
+    if (lblTotal) lblTotal.textContent = `${Math.max(0, total).toFixed(2)} €`;
+    
+    // Atualizar label de dias
+    const lblDias = document.getElementById('lblDias');
+    if (lblDias) lblDias.textContent = d > 0 ? `${d}` : '—';
   }
 
   // Event listeners para atualizar totais quando as datas ou preços mudarem
