@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="8" cy="8" r="7.2" fill="url(#bg)" />
+  
+  <!-- Car body -->
+  <rect x="3.2" y="5.866666666666667" 
+        width="9.6" height="6.4" 
+        rx="1.6" fill="white" />
+  
+  <!-- Car windows -->
+  <rect x="4.800000000000001" y="5.4399999999999995" 
+        width="6.3999999999999995" height="2.1333333333333333" 
+        rx="0.8" fill="#60a5fa" />
+  
+  <!-- Wheels -->
+  <circle cx="4.800000000000001" cy="9.6" 
+          r="1.0666666666666667" fill="#374151" />
+  <circle cx="11.2" cy="9.6" 
+          r="1.0666666666666667" fill="#374151" />
+  
+  <!-- Car details -->
+  <rect x="4.16" y="6.4" 
+        width="1.2" height="0.8" fill="white" />
+  <rect x="10.64" y="6.4" 
+        width="1.2" height="0.8" fill="white" />
+</svg>
