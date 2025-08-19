@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OptCar - Sem Conexão à Internet</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Página offline do sistema de gestão de aluguer de veículos" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="OptCar" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    
+    <!-- PWA Icons -->
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon" />
+    <link rel="icon" type="image/png" sizes="32x32" href="img/Icon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="img/Icon-16x16.png" />
+    <link rel="apple-touch-icon" href="img/Icon-180x180.png" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json" />
+    
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <style>
+      /* Estilos para a página offline */
+      .offline-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+        text-align: center;
+      }
+      
+      .offline-icon {
+        font-size: 3rem;
+        color: var(--muted);
+        margin-bottom: 1.5rem;
+      }
+      
+      .offline-title {
+        margin-bottom: 1rem;
+        color: var(--text-primary);
+      }
+      
+      .offline-message {
+        margin-bottom: 2rem;
+        color: var(--text-secondary);
+        max-width: 400px;
+      }
+      
+      .offline-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+      
+      .connection-status {
+        margin-top: 2rem;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        background-color: var(--bg-secondary);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9em;
+      }
+      
+      .connection-status::before {
+        content: "";
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background-color: var(--danger);
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .checking-connection {
+        animation: spin 1.5s linear infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <section class="card offline-container">
+        <div class="offline-icon" aria-hidden="true">📶</div>
+        <h1 class="offline-title">Sem conexão à internet</h1>
+        <p class="offline-message">
+          Parece que você está offline no momento. Algumas funcionalidades podem estar 
+          limitadas. Tente verificar sua conexão ou volte mais tarde.
+        </p>
+        
+        <div class="offline-actions">
+          <a href="index.html" class="btn primary">Voltar ao início</a>
+          <button id="retryConnection" class="btn">Tentar reconectar</button>
+        </div>
+        
+        <div class="connection-status">
+          <span id="statusText">Offline</span>
+        </div>
+      </section>
+    </main>
+
+    <script>
+      // Verifica periodicamente a conexão
+      function checkConnection() {
+        const statusText = document.getElementById('statusText');
+        const retryBtn = document.getElementById('retryConnection');
+        
+        statusText.textContent = "Verificando conexão...";
+        retryBtn.disabled = true;
+        retryBtn.innerHTML = '<span class="checking-connection">⟳</span> Verificando...';
+        
+        fetch(window.location.origin, {
+          method: 'HEAD',
+          cache: 'no-store'
+        })
+        .then(() => {
+          // Conexão restabelecida
+          window.location.reload();
+        })
+        .catch(() => {
+          // Ainda offline
+          statusText.textContent = "Offline";
+          retryBtn.disabled = false;
+          retryBtn.textContent = "Tentar reconectar";
+        });
+      }
+      
+      // Event listeners
+      document.addEventListener('DOMContentLoaded', () => {
+        const retryBtn = document.getElementById('retryConnection');
+        retryBtn.addEventListener('click', checkConnection);
+        
+        // Verifica a conexão a cada 30 segundos automaticamente
+        setInterval(checkConnection, 30000);
+      });
+      
+      // Verifica se a conexão foi restabelecida
+      window.addEventListener('online', () => {
+        window.location.reload();
+      });
+    </script>
+  </body>
+</html>

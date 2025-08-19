@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OptCar - Histórico</title>
+
+    <!-- PWA Meta Tags -->
+    <meta
+      name="description"
+      content="Sistema de gestão de aluguer de veículos"
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="OptCar" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+
+    <!-- PWA Icons -->
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon" />
+    <link rel="icon" type="image/png" sizes="32x32" href="img/Icon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="img/Icon-16x16.png" />
+    <link rel="apple-touch-icon" href="img/Icon-180x180.png" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json" />
+
+    <link rel="stylesheet" href="css/styles.css" />
+
+    <style>
+      label {
+        margin: 0;
+        padding: 0;
+      }
+      .page-header {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      .search-container {
+        width: 100%;
+        max-width: 500px;
+      }
+
+      @media (min-width: 768px) {
+        .page-header {
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="header-top">
+        <a href="index.html">
+          <img
+            style="max-width: 150px"
+            src="./img/Group 1.png"
+            alt="OptCar - Gestão de Aluguer de Veículos"
+          />
+        </a>
+
+        <div class="online" aria-hidden="true"></div>
+        <button
+          id="theme-toggle"
+          class="btn theme-btn"
+          aria-label="Alternar tema"
+        >
+          <span class="theme-icon">🌙</span>
+        </button>
+      </div>
+      <nav class="nav" aria-label="Navegação principal">
+        <a href="dashboard.html" class="btn">Dashboard</a>
+        <a href="criar-orcamento.html" class="btn">Novo Orçamento</a>
+        <a href="novo-aluguer.html" class="btn">Novo Aluguer</a>
+        <a href="veiculos.html" class="btn">Veículos</a>
+        <a href="historico.html" class="btn">Em Vigor</a>
+        <a href="terminados.html" class="btn">Terminados</a>
+        <a href="logout.html" class="btn danger">Logout</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="card">
+        <div class="page-header">
+          <h1>Contratos em vigor</h1>
+          <div class="search-container">
+            <input
+              id="search"
+              type="text"
+              class="search"
+              placeholder="Pesquisar por cliente, matrícula ou datas"
+              aria-label="Pesquisar contratos em vigor"
+            />
+          </div>
+        </div>
+
+        <div id="listaAlugueres" class="list" aria-live="polite"></div>
+      </section>
+      <div class="ar"></div>
+    </main>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav" aria-label="Navegação móvel">
+      <a href="dashboard.html" class="mobile-nav-item">
+        <div class="mobile-nav-icon">
+          <img src="./img/icons/dashboard-1-filled.svg" alt="Dashboard" />
+        </div>
+        <div class="mobile-nav-label">Dashboard</div>
+      </a>
+      <a href="criar-orcamento.html" class="mobile-nav-item">
+        <div class="mobile-nav-icon">
+          <img src="./img/icons/writing.png" alt="Novo Orçamento" />
+        </div>
+        <div class="mobile-nav-label">Orç.</div>
+      </a>
+      <a href="novo-aluguer.html" class="mobile-nav-item">
+        <div class="mobile-nav-icon">
+          <img src="./img/icons/add-ring-fill.svg" alt="Novo Aluguer" />
+        </div>
+        <div class="mobile-nav-label">Novo Al.</div>
+      </a>
+      <a href="veiculos.html" class="mobile-nav-item">
+        <div class="mobile-nav-icon">
+          <img src="./img/icons/car.svg" alt="Veículos" />
+        </div>
+        <div class="mobile-nav-label">Veículos</div>
+      </a>
+      <a href="historico.html" class="mobile-nav-item active">
+        <div class="mobile-nav-icon">
+          <img
+            src="./img/icons/loading-three(1).svg"
+            alt="Alugueres em vigor"
+          />
+        </div>
+        <div class="mobile-nav-label">Em Vigor</div>
+      </a>
+      <a href="terminados.html" class="mobile-nav-item">
+        <div class="mobile-nav-icon">
+          <img src="./img/icons/done2-filled.svg" alt="Alugueres terminados" />
+        </div>
+        <div class="mobile-nav-label">Terminados</div>
+      </a>
+    </nav>
+
+    <!-- Firebase SDKs (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+    <!-- jsPDF and Signature Pad -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+
+    <!-- App Scripts -->
+    <script src="js/firebase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/loading.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/contract.js"></script>
+    <script src="js/historico.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/pwa.js"></script>
+
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        protectPage();
+        const p = new Promise((resolve) => {
+          auth.onAuthStateChanged((user) => {
+            if (!user) return resolve();
+            db.ref("alugueres").once("value").finally(resolve);
+          });
+        });
+        window.loading
+          ?.when([p])
+          .then(() => window.dispatchEvent(new Event("page-ready")));
+      });
+    </script>
+  </body>
+</html>

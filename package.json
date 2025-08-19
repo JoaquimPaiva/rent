@@ -1,0 +1,41 @@
+{
+  "name": "rent-a-car-pwa",
+  "version": "1.0.0",
+  "description": "Sistema de gestão de aluguer de veículos - Progressive Web App",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx http-server . -p 8080 -c-1",
+    "dev": "npx http-server . -p 8080 -c-1 --cors",
+    "generate-icons": "node generate-icons.js",
+    "test-pwa": "npx lighthouse http://localhost:8080 --output=html --output-path=./lighthouse-report.html",
+    "build": "npm run generate-icons",
+    "postinstall": "npm run generate-icons"
+  },
+  "keywords": [
+    "pwa",
+    "rent-a-car",
+    "car-rental",
+    "progressive-web-app",
+    "firebase",
+    "offline-first"
+  ],
+  "author": "Rent-a-Car Team",
+  "license": "MIT",
+  "devDependencies": {
+    "sharp": "^0.32.6",
+    "http-server": "^14.1.1",
+    "lighthouse": "^11.4.0"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/rent-a-car-pwa.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/rent-a-car-pwa/issues"
+  },
+  "homepage": "https://github.com/your-username/rent-a-car-pwa#readme"
+}

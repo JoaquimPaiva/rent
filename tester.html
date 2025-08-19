@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OptCar - Tester</title>
+    <link rel="manifest" href="manifest.json" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+      .tester-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+      .card { padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); }
+      .muted { color: var(--muted); font-size: 12px; }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+      .row > * { margin: 4px 0; }
+      pre#log { max-height: 45vh; overflow: auto; background: #0f172a; color: #e2e8f0; padding: 12px; border-radius: 8px; }
+      .ok { color: #16a34a; }
+      .err { color: #dc2626; }
+      input[type="text"], input[type="datetime-local"], input[type="number"] { width: 100%; }
+      .btn { cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <h1>Tester</h1>
+      <p class="muted">Página para testar rapidamente as principais funcionalidades (criação/edição/receção de contratos, PDFs e Storage).</p>
+
+      <section class="tester-grid">
+        <div class="card">
+          <h3>Autenticação</h3>
+          <div class="row">
+            <button id="btnRequireAuth" class="btn">Proteger Página</button>
+            <button id="btnWhoAmI" class="btn">Quem sou eu?</button>
+            <button id="btnGoogle" class="btn">Login Google</button>
+            <button id="btnLogout" class="btn danger">Logout</button>
+          </div>
+          <div id="authState" class="muted" style="margin-top:8px;"></div>
+        </div>
+
+        <div class="card">
+          <h3>IDs e Datas</h3>
+          <div class="row">
+            <label style="flex:1">
+              <span>ID do Contrato</span>
+              <input id="contratoId" type="text" placeholder="uuid auto" />
+            </label>
+          </div>
+          <div class="row">
+            <label style="flex:1">
+              <span>Início</span>
+              <input id="inicio" type="datetime-local" />
+            </label>
+            <label style="flex:1">
+              <span>Fim</span>
+              <input id="fim" type="datetime-local" />
+            </label>
+          </div>
+          <div class="row">
+            <button id="btnGenId" class="btn">Gerar ID</button>
+            <button id="btnNowRange" class="btn">Range Agora+2d</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Contrato - Criar (template)</h3>
+          <div class="row">
+            <button id="btnCreateContrato" class="btn primary">Criar Contrato de Teste</button>
+            <button id="btnOpenPdfContrato" class="btn">Ver PDF (gerado agora)</button>
+          </div>
+          <p class="muted">Cria um contrato em <code>alugueres/{id}</code> com PDF embutido (base64).</p>
+        </div>
+
+        <div class="card">
+          <h3>Contrato - Editar (template)</h3>
+          <div class="row">
+            <button id="btnUpdateContrato" class="btn">Atualizar Contrato</button>
+          </div>
+          <p class="muted">Atualiza preço/campos simples e substitui o PDF.</p>
+        </div>
+
+        <div class="card">
+          <h3>Receção do Veículo</h3>
+          <div class="row">
+            <button id="btnRececaoContrato" class="btn end">Finalizar (Receção) + PDF</button>
+          </div>
+          <p class="muted">Move o contrato para <code>alugueres_terminados</code> com PDF de receção e atualiza <code>veiculos</code>.</p>
+        </div>
+
+        <div class="card">
+          <h3>Veículo - Stock</h3>
+          <div class="row">
+            <button id="btnAddVeiculo" class="btn">Adicionar Veículo de Teste</button>
+          </div>
+          <p class="muted">Cria/atualiza entrada em <code>veiculos/{matricula}</code> (ou ID gerado).</p>
+        </div>
+
+        <div class="card">
+          <h3>Storage - PDF</h3>
+          <div class="row">
+            <button id="btnUploadPdf" class="btn">Upload PDF p/ Storage</button>
+          </div>
+          <p class="muted">Gera PDF do contrato atual e sobe para <code>contratos/{id}.pdf</code>.</p>
+        </div>
+
+        <div class="card">
+          <h3>PDF Orçamento - Teste</h3>
+          <div class="row">
+            <button id="btnTestOrcamentoPDF" class="btn primary">Testar PDF Orçamento</button>
+            <button id="btnOpenOrcamentoPDF" class="btn">Ver PDF Orçamento</button>
+            <button id="btnCheckjsPDF" class="btn">Verificar jsPDF</button>
+          </div>
+          <p class="muted">Testa a geração de PDF de orçamento usando <code>orcamento.js</code>.</p>
+        </div>
+
+        <div class="card">
+          <h3>Limpeza</h3>
+          <div class="row">
+            <button id="btnCleanup" class="btn danger">Eliminar Contrato (ativos + terminados)</button>
+          </div>
+          <p class="muted">Apaga dados de teste do contrato indicado.</p>
+        </div>
+
+        <div class="card">
+          <h3>Alertas - Testes</h3>
+          <div class="row">
+            <button id="btnCreateAlert3d" class="btn">Criar Contrato que termina em 3 dias</button>
+            <button id="btnCreateAlert2d" class="btn">Criar Contrato que termina em 2 dias</button>
+            <button id="btnCreateAlert1d" class="btn">Criar Contrato que termina amanhã</button>
+          </div>
+          <div class="row">
+            <button id="btnSetVeicDisp0" class="btn">Simular 0 Veículos</button>
+            <button id="btnSetVeicDisp5" class="btn">Simular 5 Veículos</button>
+            <button id="btnSetOcc85" class="btn">Simular Ocupação 85%</button>
+            <button id="btnSetOcc50" class="btn">Simular Ocupação 50%</button>
+          </div>
+          <p class="muted">Usa o Dashboard para ver os alertas (carrega/atualiza). Estes botões criam dados de teste em <code>alugueres</code> e ajustam labels no DOM.</p>
+        </div>
+      </section>
+
+      <h3>Log</h3>
+      <pre id="log"></pre>
+    </main>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <!-- App scripts -->
+    <script src="js/firebase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/contract.js"></script>
+    <script src="js/orcamento.js"></script>
+
+    <script>
+      const logEl = document.getElementById('log');
+      const log = (msg, type = 'info') => {
+        const ts = new Date().toLocaleTimeString();
+        logEl.textContent += `[${ts}] ${msg}\n`;
+        logEl.scrollTop = logEl.scrollHeight;
+      };
+
+      const tinyImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGNgYAAAAAMAASsJTYQAAAAASUVORK5CYII=';
+
+      const getId = () => {
+        const el = document.getElementById('contratoId');
+        const v = (el.value || '').trim();
+        return v || (window.uuid ? window.uuid() : String(Date.now()));
+      };
+
+      const getRange = () => {
+        const i = document.getElementById('inicio').value;
+        const f = document.getElementById('fim').value;
+        return { inicio: i, fim: f };
+      };
+
+      const nowRange = () => {
+        const now = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const toLocal = (d) => {
+          const z = new Date(d.getTime() - d.getTimezoneOffset()*60000);
+          return `${z.getFullYear()}-${pad(z.getMonth()+1)}-${pad(z.getDate())}T${pad(z.getHours())}:${pad(z.getMinutes())}`;
+        };
+        const start = now;
+        const end = new Date(now.getTime() + 2*24*60*60*1000);
+        document.getElementById('inicio').value = toLocal(start);
+        document.getElementById('fim').value = toLocal(end);
+      };
+
+      const userMeta = () => {
+        const u = window.auth?.currentUser || null;
+        return { uid: u?.uid || null, email: u?.email || null, nome: (u?.displayName || u?.email || '—') };
+      };
+
+      const extractBase64PdfCompat = (dataUri) => {
+        if (window.pdfUtils && typeof window.pdfUtils.extractBase64Pdf === 'function') return window.pdfUtils.extractBase64Pdf(dataUri);
+        const p = (dataUri || '').split(',');
+        return (p[1] || '').replace(/\s+/g, '');
+      };
+
+      // UI buttons
+      document.getElementById('btnGenId').onclick = () => {
+        const id = getId();
+        document.getElementById('contratoId').value = id;
+        log(`ID definido: ${id}`, 'ok');
+      };
+      document.getElementById('btnNowRange').onclick = nowRange;
+
+      document.getElementById('btnRequireAuth').onclick = () => {
+        try { window.protectPage?.(); log('protectPage() chamado', 'ok'); } catch (e) { log('protectPage falhou: ' + e.message, 'err'); }
+      };
+      document.getElementById('btnWhoAmI').onclick = () => {
+        const u = window.auth?.currentUser; document.getElementById('authState').textContent = u ? `Login: ${u.email}` : 'Sem sessão';
+      };
+      document.getElementById('btnGoogle').onclick = async () => {
+        try {
+          const provider = new firebase.auth.GoogleAuthProvider();
+          await auth.signInWithPopup(provider);
+          log('Login Google OK', 'ok');
+        } catch (e) { log('Login Google falhou: ' + e.message, 'err'); }
+      };
+      document.getElementById('btnLogout').onclick = async () => {
+        try { await auth.signOut(); log('Logout OK', 'ok'); } catch (e) { log('Logout falhou: ' + e.message, 'err'); }
+      };
+
+      // Criar Contrato
+      let lastPdfDataUri = null;
+      document.getElementById('btnCreateContrato').onclick = async () => {
+        const id = getId();
+        const { inicio, fim } = getRange();
+        try {
+          const payload = {
+            id,
+            cliente: {
+              nome: 'Cliente Teste',
+              documento: { tipo: 'CC', numero: '12345678' },
+              nif: '123456789',
+              contacto: '+351911111111',
+              email: 'cliente@example.com',
+              morada: 'Rua Exemplo 1, Lisboa'
+            },
+            veiculo: {
+              marca: 'Marca', modelo: 'Modelo', matricula: 'AA-00-BB', ano: 2020,
+              cor: 'Preto', combustivel: 'Gasolina', nivelCombustivel: '75%', quilometragem: 12345,
+              fotos: [tinyImg, tinyImg, tinyImg, tinyImg]
+            },
+            aluguer: {
+              inicio: inicio || new Date().toISOString(),
+              fim: fim || new Date(Date.now()+ 2*86400000).toISOString(),
+              precoTotal: 150.00, precoDiario: 50.00, precoCaucao: 200.00,
+              formaPagamento: 'MBWay', localDevolucao: 'Sede', observacoes: 'Contrato de teste'
+            },
+            criadoPor: userMeta(), criadoEm: new Date().toISOString()
+          };
+          const dataUri = await gerarContratoPDF(payload);
+          lastPdfDataUri = dataUri;
+          const pdfBase64 = extractBase64PdfCompat(dataUri);
+          const registro = JSON.parse(JSON.stringify(payload));
+          registro.pdfBase64 = pdfBase64;
+          await db.ref(`alugueres/${id}`).set(registro);
+          log(`Contrato criado em alugueres/${id}`, 'ok');
+        } catch (e) { log('Criar contrato falhou: ' + e.message, 'err'); }
+      };
+
+      document.getElementById('btnOpenPdfContrato').onclick = () => {
+        try {
+          if (!lastPdfDataUri) return log('Sem PDF em memória. Cria contrato primeiro.', 'err');
+          const popup = window.open('about:blank', '_blank');
+          if (!popup) return log('Popup bloqueado.', 'err');
+          if (window.pdfUtils) {
+            const blob = window.pdfUtils.dataUriToBlob(lastPdfDataUri);
+            const url = URL.createObjectURL(blob);
+            popup.location.href = url; setTimeout(()=>URL.revokeObjectURL(url), 30000);
+          } else {
+            popup.location.href = lastPdfDataUri;
+          }
+          log('PDF aberto', 'ok');
+        } catch (e) { log('Abrir PDF falhou: ' + e.message, 'err'); }
+      };
+
+      // Atualizar Contrato
+      document.getElementById('btnUpdateContrato').onclick = async () => {
+        const id = getId();
+        const { inicio, fim } = getRange();
+        try {
+          const snap = await db.ref(`alugueres/${id}`).once('value');
+          if (!snap.exists()) throw new Error('Contrato não existe');
+          const contrato = { _id: id, ...snap.val() };
+          contrato.aluguer = contrato.aluguer || {};
+          contrato.aluguer.precoTotal = (contrato.aluguer.precoTotal || 0) + 10;
+          if (inicio) contrato.aluguer.inicio = inicio;
+          if (fim) contrato.aluguer.fim = fim;
+          const dataUri = await gerarContratoPDF({ id, ...contrato, atualizadoPor: userMeta(), atualizadoEm: new Date().toISOString() });
+          lastPdfDataUri = dataUri;
+          const pdfBase64 = extractBase64PdfCompat(dataUri);
+          contrato.pdfBase64 = pdfBase64;
+          await db.ref(`alugueres/${id}`).update(contrato);
+          log(`Contrato atualizado em alugueres/${id}`, 'ok');
+        } catch (e) { log('Atualizar contrato falhou: ' + e.message, 'err'); }
+      };
+
+      // Receção + mover para terminados
+      document.getElementById('btnRececaoContrato').onclick = async () => {
+        const id = getId();
+        try {
+          const snap = await db.ref(`alugueres/${id}`).once('value');
+          if (!snap.exists()) throw new Error('Contrato não existe');
+          const contratoAtual = { _id: id, ...snap.val() };
+          const agoraIso = new Date().toISOString();
+          const rececao = {
+            quilometragemDevolucao: (contratoAtual.veiculo?.quilometragem || 12345) + 321,
+            nivelCombustivelDevolucao: 60,
+            dataDevolucao: agoraIso,
+            estadoGeralDevolucao: 'Bom',
+            estadoPneus: true, estadoPintura: true, estadoVidros: true, estadoInterior: true, estadoLuzes: true,
+            fotosDevolucao: [tinyImg, tinyImg, tinyImg, tinyImg],
+            danosIdentificados: '', observacoesRececao: 'Receção teste',
+            assinaturaRececao: null,
+            recebidoEm: agoraIso, recebidoPor: userMeta()
+          };
+          const dataUri = await gerarRececaoPDF({ id, ...contratoAtual, rececao });
+          const pdfBase64 = extractBase64PdfCompat(dataUri);
+          const contratoCompleto = {
+            ...contratoAtual,
+            rececao: { ...rececao, pdfBase64 },
+            aluguer: { ...(contratoAtual.aluguer || {}), estado: 'terminado', terminadoEm: agoraIso, terminadoPor: userMeta() }
+          };
+          await db.ref().update({ [`alugueres_terminados/${id}`]: contratoCompleto, [`alugueres/${id}`]: null });
+          log(`Contrato movido para terminados (${id})`, 'ok');
+        } catch (e) { log('Receção falhou: ' + e.message, 'err'); }
+      };
+
+      // Veículo - adicionar/atualizar
+      document.getElementById('btnAddVeiculo').onclick = async () => {
+        try {
+          const id = 'VEIC-' + (window.uuid ? window.uuid().slice(0,8) : String(Date.now()));
+          const v = {
+            marca: 'Marca', modelo: 'Modelo', matricula: 'AA-00-BB', ano: 2020, cor: 'Preto',
+            combustivel: 'Gasolina', nivelCombustivel: '75%', quilometragem: 12345,
+            estado: 'Bom', estadoChecklist: { pneus:true, pintura:true, vidros:true, interior:true, luzes:true },
+            fotos: [tinyImg, tinyImg, tinyImg, tinyImg],
+            criadoPor: userMeta(), criadoEm: new Date().toISOString()
+          };
+          await db.ref(`veiculos/${id}`).set(v);
+          log(`Veículo criado em veiculos/${id}`, 'ok');
+        } catch (e) { log('Adicionar veículo falhou: ' + e.message, 'err'); }
+      };
+
+      // Storage upload do PDF do contrato
+      document.getElementById('btnUploadPdf').onclick = async () => {
+        const id = getId();
+        try {
+          if (!window.storage) throw new Error('Firebase Storage não disponível');
+          if (!lastPdfDataUri) {
+            const snap = await db.ref(`alugueres/${id}`).once('value');
+            if (!snap.exists()) throw new Error('Contrato não existe');
+            const contrato = { _id: id, ...snap.val() };
+            const dataUri = await gerarContratoPDF({ id, ...contrato });
+            lastPdfDataUri = dataUri;
+          }
+          const base64 = extractBase64PdfCompat(lastPdfDataUri);
+          const ref = storage.ref(`contratos/${id}.pdf`);
+          await ref.putString(base64, 'base64', { contentType: 'application/pdf' });
+          const url = await ref.getDownloadURL();
+          log(`PDF no Storage: ${url}`, 'ok');
+          window.open(url, '_blank');
+        } catch (e) { log('Upload PDF falhou: ' + e.message, 'err'); }
+      };
+
+      // Teste do PDF de Orçamento
+      let lastOrcamentoPDFDataUri = null;
+      document.getElementById('btnTestOrcamentoPDF').onclick = async () => {
+        try {
+          if (typeof window.gerarOrcamentoPDF !== 'function') {
+            throw new Error('Função gerarOrcamentoPDF não está disponível. Verifique se orcamento.js foi carregado.');
+          }
+
+          // Dados de teste para o orçamento
+          const dadosTeste = {
+            cliente: {
+              nome: 'João Silva Santos',
+              nif: '123456789',
+              contacto: '+351 911 111 111',
+              email: 'joao.silva@email.com',
+              morada: 'Rua das Flores, 123, 1000-000 Lisboa'
+            },
+            veiculo: {
+              marca: 'BMW',
+              modelo: 'X3 xDrive20d',
+              matricula: 'AA-00-BB',
+              cor: 'Azul Metálico',
+              combustivel: 'Diesel',
+              ano: 2022,
+              quilometragem: 15420,
+              nivelCombustivel: '85%'
+            },
+            orcamento: {
+              inicio: '2024-01-15',
+              fim: '2024-01-20',
+              dias: 5,
+              precoDiario: 75.00,
+              extras: 25.00,
+              desconto: 10.00,
+              caucao: 300.00,
+              observacoes: 'Orçamento de teste para demonstração das funcionalidades do sistema. Inclui seguro completo e assistência em viagem.'
+            }
+          };
+
+          log('Gerando PDF de orçamento...', 'info');
+          const dataUri = window.gerarOrcamentoPDF(dadosTeste);
+          lastOrcamentoPDFDataUri = dataUri;
+          
+          log('PDF de orçamento gerado com sucesso!', 'ok');
+          log(`Tamanho do PDF: ${Math.round(dataUri.length / 1024)} KB`, 'info');
+          
+          // Mostrar preview se possível
+          if (window.pdfUtils && typeof window.pdfUtils.dataUriToBlob === 'function') {
+            try {
+              const blob = window.pdfUtils.dataUriToBlob(dataUri);
+              const url = URL.createObjectURL(blob);
+              log('PDF convertido para blob e URL criada', 'ok');
+              setTimeout(() => URL.revokeObjectURL(url), 30000); // Limpar após 30s
+            } catch (e) {
+              log('Erro ao converter para blob: ' + e.message, 'err');
+            }
+          }
+          
+        } catch (e) {
+          log('Erro ao gerar PDF de orçamento: ' + e.message, 'err');
+          console.error('Erro completo:', e);
+        }
+      };
+
+      document.getElementById('btnOpenOrcamentoPDF').onclick = () => {
+        try {
+          if (!lastOrcamentoPDFDataUri) {
+            return log('Sem PDF de orçamento em memória. Gera o PDF primeiro.', 'err');
+          }
+          
+          const popup = window.open('about:blank', '_blank');
+          if (!popup) {
+            return log('Popup bloqueado pelo navegador.', 'err');
+          }
+          
+          if (window.pdfUtils && typeof window.pdfUtils.dataUriToBlob === 'function') {
+            try {
+              const blob = window.pdfUtils.dataUriToBlob(lastOrcamentoPDFDataUri);
+              const url = URL.createObjectURL(blob);
+              popup.location.href = url;
+              setTimeout(() => URL.revokeObjectURL(url), 30000);
+              log('PDF de orçamento aberto em nova janela', 'ok');
+            } catch (e) {
+              log('Erro ao abrir PDF com pdfUtils: ' + e.message, 'err');
+              // Fallback para data URI direto
+              popup.location.href = lastOrcamentoPDFDataUri;
+              log('PDF aberto com fallback (data URI direto)', 'ok');
+            }
+          } else {
+            // Fallback se pdfUtils não estiver disponível
+            popup.location.href = lastOrcamentoPDFDataUri;
+                      log('PDF aberto com fallback (data URI direto)', 'ok');
+        }
+        
+      } catch (e) {
+        log('Erro ao abrir PDF de orçamento: ' + e.message, 'err');
+      }
+    };
+
+    // Verificar estado do jsPDF
+    document.getElementById('btnCheckjsPDF').onclick = () => {
+      try {
+        log('=== VERIFICAÇÃO DO JSPDF ===', 'info');
+        
+        // Verificar jsPDF global
+        if (typeof window.jspdf !== 'undefined') {
+          log('✓ window.jspdf está disponível', 'ok');
+          log(`  - Tipo: ${typeof window.jspdf}`, 'info');
+          log(`  - Propriedades: ${Object.keys(window.jspdf).join(', ')}`, 'info');
+          
+          if (typeof window.jspdf.jsPDF === 'function') {
+            log('✓ window.jspdf.jsPDF é uma função', 'ok');
+          } else {
+            log('✗ window.jspdf.jsPDF não é uma função', 'err');
+          }
+        } else {
+          log('✗ window.jspdf não está disponível', 'err');
+        }
+        
+        // Verificar jsPDF direto
+        if (typeof window.jsPDF === 'function') {
+          log('✓ window.jsPDF está disponível diretamente', 'ok');
+        } else {
+          log('✗ window.jsPDF não está disponível diretamente', 'info');
+        }
+        
+        // Verificar função gerarOrcamentoPDF
+        if (typeof window.gerarOrcamentoPDF === 'function') {
+          log('✓ window.gerarOrcamentoPDF está disponível', 'ok');
+        } else {
+          log('✗ window.gerarOrcamentoPDF não está disponível', 'err');
+        }
+        
+        // Verificar função calcularTotaisOrcamento
+        if (typeof window.calcularTotaisOrcamento === 'function') {
+          log('✓ window.calcularTotaisOrcamento está disponível', 'ok');
+        } else {
+          log('✗ window.calcularTotaisOrcamento não está disponível', 'err');
+        }
+        
+        // Teste de criação de PDF básico
+        try {
+          if (window.jspdf && window.jspdf.jsPDF) {
+            const testDoc = new window.jspdf.jsPDF();
+            log('✓ Teste de criação de PDF básico: OK', 'ok');
+            log(`  - Páginas: ${testDoc.internal.getNumberOfPages()}`, 'info');
+            log(`  - Tamanho: ${testDoc.internal.pageSize.getWidth()} x ${testDoc.internal.pageSize.getHeight()}`, 'info');
+          }
+        } catch (e) {
+          log('✗ Teste de criação de PDF básico falhou: ' + e.message, 'err');
+        }
+        
+        log('=== FIM DA VERIFICAÇÃO ===', 'info');
+        
+      } catch (e) {
+        log('Erro na verificação do jsPDF: ' + e.message, 'err');
+      }
+    };
+
+      // Cleanup
+      document.getElementById('btnCleanup').onclick = async () => {
+        const id = getId();
+        try {
+          await db.ref().update({ [`alugueres/${id}`]: null, [`alugueres_terminados/${id}`]: null });
+          log(`Removido alugueres e terminados para ${id}`, 'ok');
+        } catch (e) { log('Cleanup falhou: ' + e.message, 'err'); }
+      };
+
+      // ---------- Alertas: criação de contratos com fim em N dias ----------
+      const createEndingInDays = async (days) => {
+        const id = 'ALERT-' + (window.uuid ? window.uuid().slice(0,8) : String(Date.now()));
+        const now = new Date();
+        const start = new Date(now.getTime() - 1*24*60*60*1000);
+        const end = new Date(now.getTime() + days*24*60*60*1000);
+        const payload = {
+          cliente: { nome: `Cliente Alert ${days}d` },
+          veiculo: { marca: 'Marca', modelo: 'Modelo', matricula: `ZZ-${days}D-AL` },
+          aluguer: { inicio: start.toISOString(), fim: end.toISOString(), precoTotal: 100 },
+          criadoPor: userMeta(), criadoEm: now.toISOString()
+        };
+        await db.ref(`alugueres/${id}`).set(payload);
+        log(`Criado contrato ${id} que termina em ${days} dia(s)`, 'ok');
+      };
+      document.getElementById('btnCreateAlert3d').onclick = () => createEndingInDays(3);
+      document.getElementById('btnCreateAlert2d').onclick = () => createEndingInDays(2);
+      document.getElementById('btnCreateAlert1d').onclick = () => createEndingInDays(1);
+
+      // ---------- Alertas: simular labels do Dashboard ----------
+      document.getElementById('btnSetVeicDisp0').onclick = () => {
+        let el = document.getElementById('veiculosDisponiveis');
+        if (!el) { el = document.createElement('span'); el.id = 'veiculosDisponiveis'; document.body.appendChild(el); }
+        el.textContent = '0'; log('Simulado veiculosDisponiveis=0', 'ok');
+      };
+      document.getElementById('btnSetVeicDisp5').onclick = () => {
+        let el = document.getElementById('veiculosDisponiveis');
+        if (!el) { el = document.createElement('span'); el.id = 'veiculosDisponiveis'; document.body.appendChild(el); }
+        el.textContent = '5'; log('Simulado veiculosDisponiveis=5', 'ok');
+      };
+      document.getElementById('btnSetOcc85').onclick = () => {
+        let el = document.getElementById('occupationLabel');
+        if (!el) { el = document.createElement('span'); el.id = 'occupationLabel'; document.body.appendChild(el); }
+        el.textContent = '85%'; log('Simulado occupationLabel=85%', 'ok');
+      };
+      document.getElementById('btnSetOcc50').onclick = () => {
+        let el = document.getElementById('occupationLabel');
+        if (!el) { el = document.createElement('span'); el.id = 'occupationLabel'; document.body.appendChild(el); }
+        el.textContent = '50%'; log('Simulado occupationLabel=50%', 'ok');
+      };
+
+      // Defaults
+      (function initDefaults(){
+        try { nowRange(); } catch {}
+        try { document.getElementById('contratoId').value = getId(); } catch {}
+      })();
+    </script>
+  </body>
+</html>
+
+

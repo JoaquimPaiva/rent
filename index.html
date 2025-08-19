@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OptCar - Login</title>
+
+  <!-- PWA Meta Tags -->
+  <meta name="description" content="Sistema de gestão de aluguer de veículos" />
+  <meta name="theme-color" content="#fff" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="OptCar" />
+  <meta name="msapplication-TileColor" content="#fff" />
+
+  <!-- PWA Icons -->
+  <link rel="icon" href="img/favicon.ico" type="image/x-icon" />
+  <link rel="icon" type="image/png" sizes="32x32" href="img/Icon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="img/Icon-16x16.png" />
+  <link rel="apple-touch-icon" href="img/Icon-180x180.png" />
+
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="manifest.json" />
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    label {
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-top">
+      <a href="index.html">
+        <img 
+          style="max-width: 150px;" 
+          src="./img/Group 1.png" 
+          alt="Logo OptCar"
+        >
+      </a>
+
+      <div class="online" aria-hidden="true"></div>
+      <button
+        id="theme-toggle"
+        class="btn theme-btn"
+        aria-label="Alternar tema"
+      >
+        <span class="theme-icon">🌙</span>
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="card">
+      <h1>Login</h1>
+      <form id="loginForm" class="form-grid" aria-label="Formulário de login">
+        <label for="email">
+          <span>Email</span>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            placeholder="email@exemplo.com"
+            required
+            autocomplete="username"
+          />
+        </label>
+        <label for="password">
+          <span>Password</span>
+          <input
+            type="password"
+            id="password"
+            name="password"
+            placeholder="*******"
+            required
+            autocomplete="current-password"
+          />
+        </label>
+        <button type="submit" class="btn primary">Entrar</button>
+      </form>
+      <p id="loginError" class="error" hidden aria-live="assertive"></p>
+      
+      <div class="alternative-login">
+        <span class="muted">ou</span>
+        <button
+          id="btnGoogle"
+          class="btn"
+          aria-label="Entrar com Google"
+          type="button"
+        >
+          <img
+            src="img/icons8-google.svg"
+            alt=""
+            aria-hidden="true"
+            class="google-icon"
+          />
+          Entrar com Google
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Firebase SDKs (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+  <!-- App Scripts -->
+  <script src="js/firebase.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/loading.js"></script>
+  <script src="js/theme.js"></script>
+  <script src="js/notifications.js"></script>
+  <script src="js/cache.js"></script>
+  <script src="js/analytics.js"></script>
+  <script src="js/pwa.js"></script>
+  
+  <script>
+    window.addEventListener("DOMContentLoaded", () => {
+      // Aguardar breve setup + verificação de sessão
+      const p = new Promise((resolve) => setTimeout(resolve, 500));
+      window.loading
+        ?.when([p])
+        .then(() => window.dispatchEvent(new Event("page-ready")));
+    });
+  </script>
+</body>
+</html>

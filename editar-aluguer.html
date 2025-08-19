@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OptCar - Editar Aluguer</title>
+
+    <!-- PWA Meta Tags -->
+    <meta
+      name="description"
+      content="Sistema de gestão de aluguer de veículos"
+    />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="OptCar" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+
+    <!-- PWA Icons -->
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon" />
+    <link rel="icon" type="image/png" sizes="32x32" href="img/Icon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="img/Icon-16x16.png" />
+    <link rel="apple-touch-icon" href="img/Icon-180x180.png" />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json" />
+
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <style>
+      /* Estilos base */
+      label {
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Melhorias para o formulário */
+      .form-grid {
+        max-width: 900px;
+        margin: 0 auto;
+      }
+
+      .wizard-step {
+        transition: opacity 0.3s ease;
+      }
+
+      .signature-wrap {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 20px;
+      }
+
+      .signature-actions {
+        margin-top: 8px;
+      }
+
+      /* Spinner de carregamento */
+      .loading-spinner {
+        display: none;
+        margin: 20px auto;
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        border-top: 4px solid #3498db;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Melhorias para a lista de fotos */
+      .foto-list {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+
+      .foto-preview {
+        position: relative;
+        width: 100px;
+        height: 100px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+
+      .foto-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .remove-foto {
+        position: absolute;
+        top: 4px;
+        right: 4px;
+        background: rgba(0, 0, 0, 0.5);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="header-top">
+        <a href="index.html"
+          ><img
+            style="max-width: 150px"
+            src="./img/Group 1.png"
+            alt="Logo OptCar"
+        /></a>
+        <div class="online" aria-hidden="true"></div>
+        <button
+          id="theme-toggle"
+          class="btn theme-btn"
+          aria-label="Alternar tema claro/escuro"
+          title="Alternar tema"
+        >
+          <span class="theme-icon">🌙</span>
+        </button>
+      </div>
+      <nav class="nav" aria-label="Navegação principal">
+        <a href="dashboard.html" class="btn">Dashboard</a>
+        <a href="criar-orcamento.html" class="btn">Novo Orçamento</a>
+        <a href="novo-aluguer.html" class="btn">Novo Aluguer</a>
+        <a href="veiculos.html" class="btn">Veículos</a>
+        <a href="historico.html" class="btn">Em Vigor</a>
+        <a href="terminados.html" class="btn">Terminados</a>
+        <a href="logout.html" class="btn danger">Logout</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <form
+        id="aluguerForm"
+        class="card form-grid"
+        autocomplete="off"
+        novalidate
+      >
+        <!-- Passo 1: Secção Cliente -->
+        <div class="wizard-step" data-step="1">
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 6px;
+            "
+          >
+            <h2>Secção Cliente</h2>
+            <span id="contratoId" class="muted" style="font-size: 14px"></span>
+          </div>
+          <label
+            ><span>Nome completo</span
+            ><input type="text" id="clienteNome" required
+          /></label>
+          <div class="grid-2">
+            <label>
+              <span>Tipo de documento</span>
+              <select id="clienteDocTipo">
+                <option value="CC">CC</option>
+                <option value="Passaporte">Passaporte</option>
+              </select>
+            </label>
+            <label
+              ><span>Número do documento</span
+              ><input type="text" id="clienteDocNumero" required
+            /></label>
+          </div>
+          <div class="grid-3">
+            <label
+              ><span>NIF</span><input type="text" id="clienteNif" required
+            /></label>
+            <label
+              ><span>Data de nascimento</span
+              ><input type="date" id="clienteDataNasc" required
+            /></label>
+            <label
+              ><span>Contacto</span
+              ><input type="tel" id="clienteContacto" required
+            /></label>
+          </div>
+          <div class="grid-2">
+            <label
+              ><span>Email</span><input type="email" id="clienteEmail" required
+            /></label>
+            <label class="full"
+              ><span>Morada</span
+              ><textarea id="clienteMorada" rows="2" required></textarea>
+            </label>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn primary btn-next">Seguinte</button>
+          </div>
+        </div>
+
+        <!-- Passo 2: Secção Veículo -->
+        <div class="wizard-step" data-step="2" style="display: none">
+          <h2>Secção Veículo</h2>
+          <div class="grid-2">
+            <label class="full">
+              <span>Veículo (stock)</span>
+              <select id="selVeiculo">
+                <option value="">Seleciona um veículo do stock…</option>
+              </select>
+            </label>
+            <div class="form-actions" style="align-self: end; margin: 0">
+              <a href="veiculos.html" class="btn">Gerir veículos</a>
+            </div>
+          </div>
+          <div
+            id="veiculoDetalhes"
+            class="card"
+            style="padding: 12px; margin: 8px 0; display: none"
+          >
+            <strong id="vdTitulo"></strong>
+            <div id="vdLinha1" class="muted" style="margin-top: 4px"></div>
+            <div id="vdLinha2" class="muted" style="margin-top: 2px"></div>
+          </div>
+          <label class="full">
+            <span>Fotografias adicionais (opcional)</span>
+            <div id="veicFotosWrap" class="foto-list">
+              <!-- Fotos existentes serão adicionadas aqui via JavaScript -->
+            </div>
+            <div class="form-actions" style="margin-top: 8px">
+              <button type="button" id="addFoto" class="btn">
+                Adicionar fotografia
+              </button>
+            </div>
+          </label>
+          <div class="form-actions" style="margin-top: 8px">
+            <button type="button" class="btn btn-prev">Voltar</button>
+            <button type="button" class="btn primary btn-next">Seguinte</button>
+          </div>
+        </div>
+
+        <!-- Passo 3: Secção Aluguer -->
+        <div class="wizard-step" data-step="3" style="display: none">
+          <h2>Secção Aluguer</h2>
+          <div class="grid-3">
+            <label
+              ><span>Início</span
+              ><input type="datetime-local" id="algInicio" required
+            /></label>
+            <label
+              ><span>Fim</span
+              ><input type="datetime-local" id="algFim" required
+            /></label>
+            <label
+              ><span>Preço total (€)</span
+              ><input type="number" id="algPreco" min="0" step="0.01" required
+            /></label>
+          </div>
+          <div class="grid-3">
+            <label
+              ><span>Preço diário (€)</span
+              ><input type="number" id="algPrecoDiario" min="0" step="0.01"
+            /></label>
+            <label
+              ><span>Caução (€)</span
+              ><input type="number" id="algCaucao" min="0" step="0.01"
+            /></label>
+            <label>
+              <span>Forma de pagamento</span>
+              <select id="algFormaPagamento">
+                <option value="">—</option>
+                <option value="Dinheiro">Dinheiro</option>
+                <option value="MBWay">MBWay</option>
+                <option value="Cartão">Cartão</option>
+                <option value="Transferência">Transferência</option>
+              </select>
+            </label>
+          </div>
+          <label class="full"
+            ><span>Local de devolução</span
+            ><input type="text" id="algLocalDevolucao"
+          /></label>
+          <label class="full"
+            ><span>Observações</span><textarea id="algObs" rows="2"></textarea>
+          </label>
+          <div class="form-actions" style="margin-top: 8px">
+            <button type="button" class="btn btn-prev">Voltar</button>
+            <button type="button" class="btn primary btn-next">Seguinte</button>
+          </div>
+        </div>
+
+        <!-- Passo 4: Resumo -->
+        <div class="wizard-step" data-step="4" style="display: none">
+          <h2>Resumo</h2>
+          <div id="resumoConteudo" class="card" style="padding: 12px"></div>
+          <div class="form-actions" style="margin-top: 8px">
+            <button type="button" class="btn btn-prev">Voltar</button>
+            <button type="button" class="btn primary btn-next">Seguinte</button>
+          </div>
+        </div>
+
+        <!-- Passo 5: Assinaturas -->
+        <div class="wizard-step" data-step="5" style="display: none">
+          <h2>Assinatura do Cliente (opcional)</h2>
+          <div class="signature-wrap">
+            <canvas
+              id="signaturePad"
+              width="299"
+              height="180"
+              aria-label="Área para assinatura do cliente"
+            ></canvas>
+            <div class="signature-actions">
+              <button type="button" id="clearSignature" class="btn">
+                Limpar
+              </button>
+            </div>
+          </div>
+          <h2>Assinatura da Locadora (opcional)</h2>
+          <div class="signature-wrap">
+            <canvas
+              id="signaturePadLocadora"
+              width="299"
+              height="180"
+              aria-label="Área para assinatura da locadora"
+            ></canvas>
+            <div class="signature-actions">
+              <button type="button" id="clearSignatureLocadora" class="btn">
+                Limpar
+              </button>
+            </div>
+          </div>
+          <div class="form-actions">
+            <button type="button" class="btn btn-prev">Voltar</button>
+            <button type="submit" id="submitBtn" class="btn primary">
+              Atualizar Contrato
+            </button>
+            <p id="formMsg" class="info" hidden></p>
+          </div>
+        </div>
+      </form>
+      <div class="ar"></div>
+    </main>
+
+    <!-- Mobile Navigation -->
+    <nav class="mobile-nav" aria-label="Navegação móvel">
+      <a href="dashboard.html" class="mobile-nav-item">
+        <div class="mobile-nav-icon">
+          <img src="./img/icons/dashboard-1-filled.svg" alt="Dashboard" />
+        </div>
+        <div class="mobile-nav-label">Dashboard</div>
+      </a>
+      <a href="criar-orcamento.html" class="mobile-nav-item">
+        <div class="mobile-nav-icon">
+          <img src="./img/icons/writing.png" alt="Novo Orçamento" />
+        </div>
+        <div class="mobile-nav-label">Novo</div>
+      </a>
+      <a href="novo-aluguer.html" class="mobile-nav-item">
+        <div class="mobile-nav-icon">
+          <img src="./img/icons/add-ring-fill.svg" alt="Novo Aluguer" />
+        </div>
+        <div class="mobile-nav-label">Novo</div>
+      </a>
+      <a href="veiculos.html" class="mobile-nav-item active">
+        <div class="mobile-nav-icon">
+          <img src="./img/icons/car.svg" alt="Veículos" />
+        </div>
+        <div class="mobile-nav-label">Veículos</div>
+      </a>
+      <a href="historico.html" class="mobile-nav-item">
+        <div class="mobile-nav-icon">
+          <img src="./img/icons/loading-three(1).svg" alt="Em Vigor" />
+        </div>
+        <div class="mobile-nav-label">Em Vigor</div>
+      </a>
+      <a href="terminados.html" class="mobile-nav-item">
+        <div class="mobile-nav-icon">
+          <img src="./img/icons/done2-filled.svg" alt="Terminados" />
+        </div>
+        <div class="mobile-nav-label">Terminados</div>
+      </a>
+    </nav>
+
+    <!-- Firebase SDKs (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
+    <!-- Bibliotecas externas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+
+    <!-- Scripts locais -->
+    <script src="js/firebase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/contract.js"></script>
+    <script src="js/forms.js"></script>
+    <script src="js/editarAluguer.js"></script>
+    <script src="js/inputs.js"></script>
+    <script src="js/loading.js"></script>
+    <script src="js/notifications.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/pwa.js"></script>
+
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        protectPage();
+
+        // Mostrar spinner durante o carregamento
+        const spinner = document.createElement("div");
+        spinner.className = "loading-spinner";
+        document.querySelector("main").prepend(spinner);
+        spinner.style.display = "none";
+
+        // Loading control: espera por auth + primeira leitura do contrato
+        const p = new Promise((resolve) => {
+          const url = new URLSearchParams(window.location.search);
+          const id = url.get("id");
+          auth.onAuthStateChanged((user) => {
+            if (!user) return resolve();
+            if (!id) return resolve();
+            db.ref(`alugueres/${id}`).once("value").finally(resolve);
+          });
+        });
+
+        window.loading?.when([p]).then(() => {
+          window.dispatchEvent(new Event("page-ready"));
+          spinner.style.display = "none";
+        });
+      });
+    </script>
+  </body>
+</html>

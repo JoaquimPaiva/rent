@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OptCar - Receção do Veículo</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Sistema de gestão de aluguer de veículos" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="OptCar" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    
+    <!-- PWA Icons -->
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon" />
+    <link rel="icon" type="image/png" sizes="32x32" href="img/Icon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="img/Icon-16x16.png" />
+    <link rel="apple-touch-icon" href="img/Icon-180x180.png" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json" />
+    
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="header-top">
+        <a href="index.html"><img style="max-width: 150px;" src="./img/Group 1.png" alt=""></a>
+
+        <div class="online"></div>
+        <button
+          id="theme-toggle"
+          class="btn theme-btn"
+          aria-label="Alternar tema"
+        >
+          <span class="theme-icon">🌙</span>
+        </button>
+      </div>
+      <nav class="nav">
+        <a href="dashboard.html" class="btn">Dashboard</a>
+        <a href="novo-aluguer.html" class="btn">Novo Aluguer</a>
+        <a href="veiculos.html" class="btn">Veículos</a>
+        <a href="historico.html" class="btn">Em Vigor</a>
+        <a href="terminados.html" class="btn">Terminados</a>
+        <a href="logout.html" class="btn danger">Logout</a>
+      </nav>
+    </header>
+
+    <main class="container">
+      <form
+        id="rececaoForm"
+        class="card form-grid"
+        autocomplete="off"
+        novalidate
+      >
+        <div
+          style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+          "
+        >
+          <h2>Receção do Veículo</h2>
+          <span
+            id="contratoId"
+            style="color: var(--muted); font-size: 14px"
+          ></span>
+        </div>
+
+        <p class="quote">
+          <strong
+            >Formulário de receção e aceitação do veículo no ato da
+            devolução.</strong
+          >
+        </p>
+
+        <h3>Informações do Contrato</h3>
+        <div
+          id="infoContrato"
+          class="info-card"
+          style="
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+          "
+        >
+          <p><strong>Cliente:</strong> <span id="clienteNome"></span></p>
+          <p><strong>Veículo:</strong> <span id="veiculoInfo"></span></p>
+          <p><strong>Período:</strong> <span id="periodoAluguer"></span></p>
+        </div>
+
+        <h3>Estado do Veículo na Devolução</h3>
+        <div class="grid-3">
+          <label
+            ><span>Quilometragem atual</span
+            ><input type="number" id="veicKmAtual" required
+          /></label>
+          <label
+            ><span>Nível de combustível (%)</span
+            ><input type="number" id="veicCombAtual" min="0" max="100" required
+          /></label>
+          <label
+            ><span>Data e hora da devolução</span
+            ><input type="datetime-local" id="dataDevolucao" required
+          /></label>
+        </div>
+
+        <label class="full"
+          ><span>Estado geral na devolução</span
+          ><textarea
+            id="veicEstadoDevolucao"
+            rows="3"
+            placeholder="Descreva o estado geral do veículo na devolução..."
+            required
+          ></textarea>
+        </label>
+
+        <fieldset class="checks">
+          <legend>Verificação do estado</legend>
+          <div class="full check-section" style="width:100%;">
+            <h4 class="check-section-title">Carroçaria</h4>
+            <table class="check-table">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Esq.</th>
+                  <th>Dir.</th>
+                  <th>Frente</th>
+                  <th>Trás</th>
+                  <th>Topo</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Portas (frente)</td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkPortaFrenteEsq" /></td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkPortaFrenteDir" /></td>
+                  <td></td><td></td><td></td>
+                </tr>
+                <tr>
+                  <td>Portas (trás)</td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkPortaTrasEsq" /></td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkPortaTrasDir" /></td>
+                  <td></td><td></td><td></td>
+                </tr>
+                <tr>
+                  <td>Guarda-lamas</td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkGuardaLamasEsq" /></td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkGuardaLamasDir" /></td>
+                  <td></td><td></td><td></td>
+                </tr>
+                <tr>
+                  <td>Para-choques</td>
+                  <td></td><td></td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkParaChoquesFrente" /></td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkParaChoquesTras" /></td>
+                  <td></td>
+                </tr>
+                <tr>
+                  <td>Capot</td>
+                  <td></td><td></td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkCapot" /></td>
+                  <td></td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkTejadilho" /></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="full check-section" style="width:100%; margin-top:12px;">
+            <h4 class="check-section-title">Jantes e Pneus</h4>
+            <table class="check-table">
+              <thead>
+                <tr>
+                  <th>Posição</th>
+                  <th>FE</th>
+                  <th>FD</th>
+                  <th>TE</th>
+                  <th>TD</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Pneus</td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkPneuFE" /></td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkPneuFD" /></td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkPneuTE" /></td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkPneuTD" /></td>
+                </tr>
+              </tbody>
+            </table>
+            <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:8px;justify-content: space-around;">
+              <label><input type="checkbox" id="chkJantesOK" /> Jantes OK</label>
+              <label><input type="checkbox" id="chkPneuSuplente" /> Pneu suplente</label>
+              <label><input type="checkbox" id="chkMacaco" /> Macaco</label>
+              <label><input type="checkbox" id="chkChaveRodas" /> Chave de rodas</label>
+            </div>
+          </div>
+
+          <div class="full check-section" style="width:100%; margin-top:12px;">
+            <h4 class="check-section-title">Vidros e Espelhos</h4>
+            <table class="check-table">
+              <thead>
+                <tr>
+                  <th>Elemento</th>
+                  <th>Frente</th>
+                  <th>Laterais</th>
+                  <th>Trás</th>
+                  <th>Espelhos</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Vidros</td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkParabrisas" /></td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkVidrosLaterais" /></td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkVidroTraseiro" /></td>
+                  <td style="text-align:center;"><input type="checkbox" id="chkEspelhos" /></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="full check-section" style="width:100%; margin-top:12px;">
+            <h4 class="check-section-title">Luzes</h4>
+            <table class="check-table">
+              <tbody>
+                <tr>
+                  <td><label><input type="checkbox" id="chkLuzMedios" /> Médios</label></td>
+                  <td><label><input type="checkbox" id="chkLuzMaximos" /> Máximos</label></td>
+                  <td><label><input type="checkbox" id="chkLuzPiscas" /> Piscas</label></td>
+                </tr>
+                <tr>
+                  <td><label><input type="checkbox" id="chkLuzTraseiras" /> Traseiras</label></td>
+                  <td><label><input type="checkbox" id="chkLuzStop" /> Stop</label></td>
+                  <td><label><input type="checkbox" id="chkLuzRe" /> Marcha-atrás</label></td>
+                </tr>
+                <tr>
+                  <td><label><input type="checkbox" id="chkLuzNevoeiro" /> Nevoeiro</label></td>
+                  <td></td><td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="full check-section" style="width:100%; margin-top:12px;">
+            <h4 class="check-section-title">Interior</h4>
+            <table class="check-table">
+              <tbody>
+                <tr>
+                  <td><label><input type="checkbox" id="chkBancos" /> Bancos</label></td>
+                  <td><label><input type="checkbox" id="chkTapetes" /> Tapetes</label></td>
+                  <td><label><input type="checkbox" id="chkEstofos" /> Estofos</label></td>
+                </tr>
+                <tr>
+                  <td><label><input type="checkbox" id="chkTablier" /> Tablier</label></td>
+                  <td><label><input type="checkbox" id="chkRadio" /> Rádio/Infotainment</label></td>
+                  <td><label><input type="checkbox" id="chkAC" /> AC/Aquecimento</label></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="full check-section" style="width:100%; margin-top:12px;">
+            <h4 class="check-section-title">Equipamento e Documentos</h4>
+            <table class="check-table">
+              <tbody>
+                <tr>
+                  <td><label><input type="checkbox" id="chkTriangulo" /> Triângulo</label></td>
+                  <td><label><input type="checkbox" id="chkColete" /> Colete</label></td>
+                  <td><label><input type="checkbox" id="chkKitSocorros" /> Kit 1.º socorros</label></td>
+                </tr>
+                <tr>
+                  <td><label><input type="checkbox" id="chkDUA" /> Documento único automóvel</label></td>
+                  <td><label><input type="checkbox" id="chkSeguro" /> Apólice/Cartão de Seguro</label></td>
+                  <td><label><input type="checkbox" id="chkInspecao" /> Inspeção válida</label></td>
+                </tr>
+                <tr>
+                  <td><label><input type="checkbox" id="chk2aChave" /> 2.ª Chave</label></td>
+                  <td></td><td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="full check-section" style="width:100%; margin-top:12px;">
+            <h4 class="check-section-title">Eletrónica e Funcionamento</h4>
+            <table class="check-table">
+              <tbody>
+                <tr>
+                  <td><label><input type="checkbox" id="chkVidrosEletricos" /> Vidros elétricos</label></td>
+                  <td><label><input type="checkbox" id="chkTravaoMao" /> Travão de mão</label></td>
+                  <td><label><input type="checkbox" id="chkFechosPortas" /> Fechos portas</label></td>
+                </tr>
+                <tr>
+                  <td><label><input type="checkbox" id="chkAlarme" /> Alarme</label></td>
+                  <td></td><td></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="full check-section" style="width:100%; margin-top:12px;">
+            <h4 class="check-section-title">Fluídos</h4>
+            <table class="check-table">
+              <tbody>
+                <tr>
+                  <td><label><input type="checkbox" id="chkOleo" /> Nível de óleo</label></td>
+                  <td><label><input type="checkbox" id="chkRefrigerante" /> Líquido de refrigeração</label></td>
+                  <td><label><input type="checkbox" id="chkLimpaParaBrisas" /> Líquido limpa pára-brisas</label></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </fieldset>
+
+        <h3>Fotografias da Devolução</h3>
+        <label class="full">
+          <span
+            >Fotografias do veículo na devolução (mín. 4: frente, trás,
+            esquerdo, direito)</span
+          >
+          <div
+            id="veicFotosWrap"
+            class="foto-list"
+            style="display: flex; flex-direction: column; gap: 8px"
+          >
+            <input
+              type="file"
+              id="veicFotos"
+              class="veicFoto"
+              accept="image/*"
+              capture="environment"
+            />
+          </div>
+          <div class="form-actions" style="margin-top: 8px">
+            <button type="button" id="addFoto" class="btn">
+              Adicionar fotografia
+            </button>
+          </div>
+        </label>
+
+        <h3>Observações e Danos</h3>
+        <div class="full" style="display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+          <span id="danosStatus" class="muted">Sem danos registados</span>
+          <button type="button" id="abrirDanos" class="btn">Registar pormenor dos danos</button>
+        </div>
+
+        <h3>Assinatura do Cliente</h3>
+        <div class="signature-wrap">
+          <canvas id="signaturePadCliente" width="299" height="180"></canvas>
+          <div class="signature-actions">
+            <button type="button" id="clearSignatureCliente" class="btn">Limpar</button>
+          </div>
+        </div>
+
+        <label class="full"
+          ><span>Observações adicionais</span
+          ><textarea
+            id="obsRececao"
+            rows="2"
+            placeholder="Outras observações sobre a receção..."
+          ></textarea>
+        </label>
+
+        <h3>Assinatura da Receção</h3>
+        <div class="signature-wrap">
+          <canvas id="signaturePadRececao" width="299" height="180"></canvas>
+          <div class="signature-actions">
+            <button type="button" id="clearSignatureRececao" class="btn">
+              Limpar
+            </button>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" id="submitBtn" class="btn primary">
+            Finalizar Receção e Mover para Terminados
+          </button>
+          <p id="formMsg" class="info" hidden></p>
+        </div>
+      </form>
+      <div class="ar"></div>
+    </main>
+
+    <nav class="mobile-nav">
+      <a href="dashboard.html" class="mobile-nav-item">
+        <div class="mobile-nav-icon"><img src="./img/icons/dashboard-1-filled.svg" alt=""></div>
+        <div class="mobile-nav-label">Dashboard</div>
+      </a>
+      <a href="novo-aluguer.html" class="mobile-nav-item">
+        <div class="mobile-nav-icon"><img src="./img/icons/add-ring-fill.svg" alt=""></div>
+        <div class="mobile-nav-label">Novo</div>
+      </a>
+      <a href="veiculos.html" class="mobile-nav-item">
+        <div class="mobile-nav-icon"><img src="./img/icons/car.svg" alt=""></div>
+        <div class="mobile-nav-label">Veículos</div>
+      </a>
+      <a href="historico.html" class="mobile-nav-item active">
+        <div class="mobile-nav-icon"><img src="./img/icons/loading-three(1).svg" alt=""></div>
+        <div class="mobile-nav-label">Em Vigor</div>
+      </a>
+      <a href="terminados.html" class="mobile-nav-item">
+        <div class="mobile-nav-icon"><img src="./img/icons/done2-filled.svg" alt=""></div>
+        <div class="mobile-nav-label">Terminados</div>
+      </a>
+    </nav>
+
+    <!-- Firebase SDKs (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <!-- jsPDF para gerar PDF de receção -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Signature Pad -->
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+
+    <script src="js/firebase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/contract.js"></script>
+    <script src="js/rececaoVeiculo.js"></script>
+    <script src="js/inputs.js"></script>
+    <script src="js/loading.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/pwa.js"></script>
+
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        protectPage();
+        const p = new Promise((resolve) => {
+          const url = new URLSearchParams(window.location.search);
+          const id = url.get('id');
+          if (!id) return resolve();
+          db.ref(`alugueres/${id}`).once('value').finally(resolve);
+        });
+        window.loading?.when([p]).then(() => window.dispatchEvent(new Event('page-ready')));
+      });
+    </script>
+  </body>
+</html>

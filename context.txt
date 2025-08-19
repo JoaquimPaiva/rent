@@ -1,0 +1,228 @@
+Perfeito! Vou descrever o projeto detalhado, 100% **HTML + CSS + JS puro** (sem frameworks), usando apenas Firebase para:
+
+* Base de dados (Firestore Realtime Database, vamos usar o Realtime Database que aceita armazenamento base64 facilmente)
+* Autenticação (Firebase Auth)
+* Armazenar fotos em base64 dentro do próprio Realtime Database (não em Storage, para simplificar)
+
+---
+
+# Descrição detalhada do projeto
+
+---
+
+## 1. Objetivo
+
+Aplicação web simples, responsiva e 100% frontend, que permita aos donos/funcionários da rent-a-car:
+
+* Fazer login seguro via Firebase Auth.
+* Registar clientes, veículos e alugueres.
+* Fazer upload de fotos (convertidas para base64 e guardadas na base de dados).
+* Gerar contrato PDF no browser.
+* Consultar histórico de alugueres.
+* Tudo armazenado e sincronizado na Firebase Realtime Database.
+* Interface simples e leve, compatível com telemóvel, tablet e computador.
+
+---
+
+## 2. Tecnologias usadas
+
+* **HTML5 + CSS3 + JavaScript puro** (ES6+).
+* **Firebase SDK** (Auth + Realtime Database).
+* Biblioteca externa para PDF: **jsPDF**.
+* Biblioteca opcional para assinatura digital: **Signature Pad** (JS puro).
+* Upload de fotos: `<input type="file">` com conversão base64 via FileReader API.
+
+---
+
+## 3. Estrutura de páginas e fluxos
+
+### Página 1: Login
+
+* **Campos:** email e password.
+* Botão “Entrar”.
+* Link para “Recuperar password” (opcional).
+* Login via Firebase Authentication.
+* Se login correto → redireciona para página principal.
+
+---
+
+### Página 2: Dashboard (após login)
+
+* Menu fixo/top com opções:
+
+  * Novo aluguer
+  * Histórico alugueres
+  * Logout
+* Mostra uma pequena mensagem “Bem-vindo, \[nome do usuário]”.
+
+---
+
+### Página 3: Novo Aluguer (formulário único, dividido visualmente em secções)
+
+---
+
+#### Secção Cliente
+
+* Nome completo (input texto)
+* Documento (input texto + select tipo: CC, Passaporte, etc)
+* NIF (input texto)
+* Data de nascimento (input date)
+* Contacto telefónico (input telefone)
+* Email (input email)
+* Morada (textarea)
+
+---
+
+#### Secção Veículo
+
+* Matrícula (input texto)
+* Marca (input texto)
+* Modelo (input texto)
+* Cor (input texto)
+* Quilometragem (input número)
+* Nível de combustível (select ou input número)
+* Estado geral (checkboxes): pneus, pintura, vidros, interior, luzes
+* Upload fotografias (mínimo 4, front, trás, esquerdo, direito)
+
+  * `<input type="file" multiple accept="image/*">`
+  * Fotos convertidas para base64 e guardadas no Realtime Database junto com os outros dados.
+
+---
+
+#### Secção Aluguer
+
+* Data/hora início (input datetime-local)
+* Data/hora fim (input datetime-local)
+* Preço total (input número)
+* Observações (textarea)
+
+---
+
+#### Secção Confirmação
+
+* Assinatura digital (canvas + Signature Pad) (opcional)
+* Botão “Submeter”
+
+---
+
+### Fluxo no botão Submeter
+
+1. Validação dos campos obrigatórios.
+2. Converter imagens para base64.
+3. Recolher todos os dados em objeto JS.
+4. Gravar no Firebase Realtime Database, em caminho `/alugueres/{uniqueID}`.
+5. Gerar PDF com jsPDF contendo dados + fotos + assinatura (se existir).
+6. Disponibilizar o PDF para download.
+7. Mostrar mensagem de sucesso.
+
+---
+
+### Página 4: Histórico de alugueres
+
+* Campo de pesquisa (input texto) que filtra por nome cliente, matrícula ou datas.
+* Lista dos alugueres já registados.
+* Cada aluguer com botão para visualizar detalhes e fazer download do contrato PDF (gerado anteriormente e guardado na base de dados em base64).
+* Opção para filtrar por datas.
+
+---
+
+### Página 5: Logout
+
+* Limpar sessão Firebase Auth.
+* Redirecionar para página login.
+
+---
+
+## 4. Estrutura da base de dados (Realtime Database)
+
+```json
+{
+  "users": {
+    "uid1": {
+      "email": "funcionario@exemplo.com",
+      "nome": "Funcionário 1"
+    }
+  },
+  "alugueres": {
+    "aluguerID1": {
+      "cliente": {
+        "nome": "João Silva",
+        "documento": { "tipo": "CC", "numero": "12345678" },
+        "nif": "123456789",
+        "dataNascimento": "1980-10-10",
+        "contacto": "912345678",
+        "email": "joao@mail.com",
+        "morada": "Rua das Flores 123"
+      },
+      "veiculo": {
+        "matricula": "00-00-XX",
+        "marca": "Toyota",
+        "modelo": "Corolla",
+        "cor": "Prata",
+        "quilometragem": 150000,
+        "nivelCombustivel": "75%",
+        "estado": {
+          "pneus": true,
+          "pintura": true,
+          "vidros": true,
+          "interior": true,
+          "luzes": true
+        },
+        "fotos": [
+          "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD...",
+          "...",
+          "..."
+        ]
+      },
+      "aluguer": {
+        "inicio": "2025-08-10T10:00",
+        "fim": "2025-08-15T10:00",
+        "precoTotal": 350.00,
+        "observacoes": "Sem danos",
+        "assinatura": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA..."
+      },
+      "pdfBase64": "JVBERi0xLjQKJcfs..."
+    }
+  }
+}
+```
+
+---
+
+## 5. Segurança e regras Firebase
+
+* **Auth:** apenas utilizadores registados podem aceder à app.
+* **Realtime Database Rules:** só permite leitura/escrita a utilizadores autenticados.
+* Restrições para que cada utilizador só veja o que deve (ex: todos os alugueres ou só seus).
+* HTTPS obrigatório (gerido pelo Firebase).
+* Senhas e sessões geridos pelo Firebase.
+
+---
+
+## 6. Pontos técnicos e desafios
+
+* Converter fotos para base64 pode aumentar tamanho da base de dados — recomendável limitar resolução das imagens via JS antes do upload.
+* PDF gerado no cliente deve ser simples e funcional.
+* Validação dos campos muito importante para evitar erros na base de dados.
+* Backup manual do Firebase pode ser feito exportando JSON.
+* Para envio de email e WhatsApp podes usar links manuais enquanto evoluis.
+
+---
+
+## 7. Cronograma básico de desenvolvimento
+
+| Passo                    | Descrição                                      | Tempo estimado |
+| ------------------------ | ---------------------------------------------- | -------------- |
+| 1. Configurar Firebase   | Criar projeto, ativar Auth e Realtime Database | 1 dia          |
+| 2. Criar página Login    | HTML + JS para login com Firebase Auth         | 1-2 dias       |
+| 3. Formulário aluguer    | Dividido em secções, upload fotos base64       | 2-3 dias       |
+| 4. Gravar no Firebase    | Armazenar objeto completo com base64           | 1 dia          |
+| 5. Gerar PDF client-side | Usar jsPDF para contrato                       | 1-2 dias       |
+| 6. Histórico alugueres   | Ler dados Firebase, pesquisar e mostrar lista  | 1-2 dias       |
+| 7. Testes e ajustes      | Testar em dispositivos e browsers              | 2 dias         |
+
+---
+
+Se quiseres, posso começar a ajudar a criar os ficheiros HTML, CSS e JS básicos para o login e formulário de aluguer, prontos para ligar ao Firebase. Queres?
+
+[Scaffold gerado: index.html, dashboard.html, novo-aluguer.html, historico.html, logout.html, css/styles.css, js/firebase.js, js/auth.js, js/utils.js, js/novoAluguer.js, js/historico.js]

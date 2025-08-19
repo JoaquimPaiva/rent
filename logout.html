@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-PT">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OptCar - Terminar Sessão</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="Sistema de gestão de aluguer de veículos" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="OptCar" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    
+    <!-- PWA Icons -->
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon" />
+    <link rel="icon" type="image/png" sizes="32x32" href="img/Icon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="img/Icon-16x16.png" />
+    <link rel="apple-touch-icon" href="img/Icon-180x180.png" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json" />
+    
+    <link rel="stylesheet" href="css/styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <style>
+      /* Estilos para a página de logout */
+      .logout-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 60vh;
+        text-align: center;
+      }
+      
+      .logout-spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        border-top: 4px solid #3498db;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin: 20px auto;
+      }
+      
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+      
+      .logout-message {
+        margin-top: 20px;
+        font-size: 1.1em;
+        color: var(--text-secondary);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <section class="card logout-container">
+        <div class="logout-spinner"></div>
+        <h2>A terminar sessão...</h2>
+        <p class="logout-message">Aguarde enquanto terminamos a sua sessão com segurança.</p>
+      </section>
+    </main>
+
+    <!-- Firebase SDKs (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <script src="js/firebase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/theme.js"></script>
+    <script src="js/pwa.js"></script>
+
+    <script>
+      window.addEventListener("DOMContentLoaded", async () => {
+        try {
+          // Adiciona um pequeno atraso para garantir que o spinner seja visível
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Tentativa de logout
+          await auth.signOut();
+          
+          // Limpar dados locais se necessário
+          if (window.localStorage) {
+            localStorage.clear();
+          }
+          if (window.sessionStorage) {
+            sessionStorage.clear();
+          }
+          
+          // Redirecionar para a página inicial
+          window.location.href = "index.html";
+          
+        } catch (error) {
+          console.error("Erro durante o logout:", error);
+          // Mesmo em caso de erro, redireciona para a página inicial
+          window.location.href = "index.html";
+        }
+      });
+    </script>
+  </body>
+</html>
